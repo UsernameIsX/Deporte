@@ -1,63 +1,246 @@
-// Inicialización de Auth0
-let auth0Client = null;
-const initAuth0 = async () => {
-  auth0Client = await createAuth0Client({
-    domain: "TU_DOMINIO.auth0.com",
-    client_id: "TU_CLIENT_ID"
-  });
+document.addEventListener("DOMContentLoaded", () => {
+    const loginBtn = document.getElementById("loginBtn");
+
+    loginBtn.addEventListener("click", () => {
+    alert("Aquí iría la lógica de inicio de sesión.");
+    // Ejemplo: redirigir a otra página
+    // window.location.href = "login.html";
+    });
+});
+
+// Aquí pegamos las llaves que nos dio Auth0 en el Dashboard
+const auth0Config = {
+    domain: "dev-0amwgx56x45lz7qg.us.auth0.com",
+    clientId: "XSVf6w9gS6UuJmBiuXulDiMz7GS6RiDL", 
+    authorizationParams: {
+        // Redirigimos al usuario a nuestro Live Server tras iniciar sesión
+        redirect_uri: window.location.origin 
+    }
 };
 
-initAuth0();
+// Variable global para almacenar el cliente de Auth0
+let auth0Client = null;
 
-// Carrito
-let cart = [];
+// Esta función arranca apenas carga la página
+window.onload = async () => {
+    // Inicializamos el SDK de Auth0 que importamos en el HTML
+    auth0Client = await auth0.createAuth0Client(auth0Config);
 
-document.querySelectorAll(".add-to-cart").forEach(button => {
-  button.addEventListener("click", e => {
-    const product = e.target.closest(".product");
-    const id = product.dataset.id;
-    const name = product.dataset.name;
-    const price = parseInt(product.dataset.price);
+    // Revisamos si el usuario acaba de volver de la página de inicio de sesión de Auth0
+    // Auth0 envía un código ("code" y "state") en la URL
+    const query = window.location.search;
+    if (query.includes("code=") && query.includes("state=")) {
+        // Procesamos el inicio de sesión y limpiamos la URL
+        await auth0Client.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/");
+    }
 
-    cart.push({ id, name, price });
-    updateCart();
-  });
-});
+    // Actualizamos la interfaz gráfica (botones y mensajes)
+    updateUI();
+};
 
-function updateCart() {
-  document.getElementById("cart-count").textContent = cart.length;
-  const cartItems = document.getElementById("cart-items");
-  cartItems.innerHTML = "";
-  let total = 0;
+// ==========================================
+// 3. LÓGICA DE INTERFAZ GRÁFICA (UI)
+// ==========================================
+async function updateUI() {
+    // Le preguntamos a Auth0: "¿Este usuario está conectado?"
+    const isAuthenticated = await auth0Client.isAuthenticated();
 
-  cart.forEach(item => {
-    const li = document.createElement("li");
-    li.textContent = `${item.name} - $${item.price}`;
-    cartItems.appendChild(li);
-    total += item.price;
-  });
+    const btnLogin = document.getElementById("btn-login");
+    const btnLogout = document.getElementById("btn-logout");
+    const appContent = document.getElementById("app-content");
+    const mensajeBienvenida = document.getElementById("mensaje-bienvenida");
 
-  document.getElementById("cart-total").textContent = total;
+    if (isAuthenticated) {
+        
+        btnLogin.style.display = "none";
+        btnLogout.style.display = "inline-block";
+        appContent.style.display = "block"; 
+
+        const user = await auth0Client.getUser();
+        mensajeBienvenida.innerText = `Bienvenido(a) ${user.name}`;
+    } else {
+        
+        btnLogin.style.display = "inline-block";
+        btnLogout.style.display = "none";
+        appContent.style.display = "none";
+        mensajeBienvenida.innerText = "";
+    }
 }
 
-// Mostrar/Ocultar carrito
-document.getElementById("cart-btn").addEventListener("click", () => {
-  const cartSection = document.getElementById("cart");
-  cartSection.style.display = cartSection.style.display === "none" ? "block" : "none";
+// ==========================================
+// 4. EVENTOS DE LOS BOTONES
+// ==========================================
+// Botón Iniciar Sesión
+document.getElementById("btn-login").addEventListener("click", async () => {
+    // Redirige a la página segura de Auth0
+    await auth0Client.loginWithRedirect();
 });
 
-// Autenticación
-document.getElementById("login-btn").addEventListener("click", async () => {
-  await auth0Client.loginWithPopup();
-  const user = await auth0Client.getUser();
-  document.getElementById("user-info").textContent = `Hola, ${user.name}`;
-  document.getElementById("login-btn").style.display = "none";
-  document.getElementById("logout-btn").style.display = "inline-block";
+// Botón Cerrar Sesión
+document.getElementById("btn-logout").addEventListener("click", () => {
+    // Cierra la sesión en Auth0 y devuelve al usuario a nuestra página
+    auth0Client.logout({
+        logoutParams: {
+            returnTo: window.location.origin
+        }
+    });
 });
 
-document.getElementById("logout-btn").addEventListener("click", async () => {
-  await auth0Client.logout({ returnTo: window.location.origin });
-  document.getElementById("user-info").textContent = "";
-  document.getElementById("login-btn").style.display = "inline-block";
-  document.getElementById("logout-btn").style.display = "none";
+// ==========================================
+// 5. BASE DE DATOS LOCAL (El Catálogo)
+// ==========================================
+const productos = [ // Cambiado a plural para evitar errores
+    { id: 1, categoria: "Ropa", nombre: "polera", descripcion: "Equipo Ulpo", precio: 18000, icono: "👕" },
+    { id: 2, categoria: "Calzado", nombre: "Zapatillas", descripcion: "Marca AIDO", precio: 35000, icono: "👟" },
+    { id: 3, categoria: "Gorroggg", nombre: "Jockeyggg", descripcion: "Marca Stonejjj", precio: 9000, icono: "🧢" },
+];
+
+// ==========================================
+// 6. ESTADO DE LA ORDEN
+// ==========================================
+let ordenproductos = JSON.parse(sessionStorage.getItem("orden_productos")) || [];
+
+// ==========================================
+// 7. RENDERIZADO (Pintar en pantalla)
+// ==========================================
+function renderizarCatalogo() {
+    const contenedor = document.getElementById("lista-productos");
+    if (!contenedor) return;
+    contenedor.innerHTML = ""; 
+
+    productos.forEach(prod => {
+        const tarjeta = document.createElement("div");
+        tarjeta.className = "productos-card";
+        tarjeta.innerHTML = `
+            <div style="font-size: 3rem;">${prod.icono}</div>
+            <h3>${prod.nombre}</h3>
+            <span class="categoria">${prod.categoria}</span>
+            <p>${prod.descripcion}</p>
+            <p class="precio">Copago: $${prod.precio.toLocaleString('es-CL')}</p>
+            <button onclick="agregarAOrden(${prod.id})">Agregar a la lista</button>
+        `;
+        contenedor.appendChild(tarjeta);
+    });
+}
+
+function renderizarOrden() {
+    const listaOrden = document.getElementById("items-carrito"); // ID único para el carrito
+    const spanTotal = document.getElementById("total-copago");
+    const btnAgendar = document.getElementById("btn-agendar");
+    
+    if (!listaOrden) return;
+    listaOrden.innerHTML = "";
+    let total = 0;
+
+    if (ordenproductos.length === 0) {
+        listaOrden.innerHTML = "<li>No hay productos seleccionados.</li>";
+        if (btnAgendar) btnAgendar.disabled = true;
+    } else {
+        ordenproductos.forEach((item, index) => {
+            total += item.precio;
+            const li = document.createElement("li");
+            li.innerHTML = `
+                ${item.nombre} - $${item.precio.toLocaleString('es-CL')}
+                <button onclick="eliminarDeOrden(${index})" style="background: red; color: white; border: none; cursor: pointer; margin-left: 10px;">X</button>
+            `;
+            listaOrden.appendChild(li);
+        });
+        if (btnAgendar) btnAgendar.disabled = false;
+    }
+
+    if (spanTotal) spanTotal.innerText = total.toLocaleString('es-CL');
+}
+
+// ==========================================
+// 8. FUNCIONALIDAD DEL "CARRITO"
+// ==========================================
+window.agregarAOrden = (idBuscado) => {
+    // Corregido: usamos la constante global 'productos' y evitamos el sombreado de variables
+    const productoEncontrado = productos.find(p => p.id === idBuscado);
+    
+    if (productoEncontrado) {
+        ordenproductos.push(productoEncontrado);
+        sessionStorage.setItem("orden_productos", JSON.stringify(ordenproductos));
+        renderizarOrden();
+    }
+};
+
+window.eliminarDeOrden = (index) => {
+    ordenproductos.splice(index, 1);
+    sessionStorage.setItem("orden_productos", JSON.stringify(ordenproductos));
+    renderizarOrden();
+};
+
+// ==========================================
+// 9. LÓGICA DE NAVEGACIÓN Y FORMULARIO
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    renderizarCatalogo();
+    renderizarOrden();
+
+    const btnAgendar = document.getElementById("btn-agendar");
+    const checkoutSection = document.getElementById("checkout-section");
+    const formCheckout = document.getElementById("form-checkout");
+
+    if (btnAgendar) {
+        btnAgendar.addEventListener("click", () => {
+            document.getElementById("encabezado-catalogo").style.display = "none";
+            document.getElementById("lista-productos").style.display = "none";
+            document.getElementById("orden-productos").style.display = "none";
+            checkoutSection.style.display = "block";
+        });
+    }
+
+    document.getElementById("btn-cancelar")?.addEventListener("click", () => {
+        document.getElementById("encabezado-catalogo").style.display = "block";
+        document.getElementById("lista-productos").style.display = "grid";
+        document.getElementById("orden-productos").style.display = "block";
+        checkoutSection.style.display = "none";
+    });
+
+    formCheckout?.addEventListener("submit", (evento) => {
+        evento.preventDefault();
+        
+        const correo = document.getElementById("input-correo").value;
+        const telefono = document.getElementById("input-telefono").value;
+        let esValido = true;
+
+        if (!correo.includes("@") || !correo.includes(".")) {
+            document.getElementById("error-correo").style.display = "block";
+            esValido = false;
+        } else {
+            document.getElementById("error-correo").style.display = "none";
+        }
+
+        const regexNumeros = /^\d+$/; 
+        if (!regexNumeros.test(telefono) || telefono.length < 8) {
+            document.getElementById("error-telefono").style.display = "block";
+            esValido = false;
+        } else {
+            document.getElementById("error-telefono").style.display = "none";
+        }
+
+        if (esValido) finalizarAgendamiento();
+    });
 });
+
+function finalizarAgendamiento() {
+    document.getElementById("checkout-section").style.display = "none";
+    const resumenDiv = document.getElementById("resumen-final");
+    
+    let htmlResumen = `<ul>`;
+    let total = 0;
+    ordenproductos.forEach(item => {
+        htmlResumen += `<li>${item.nombre} - $${item.precio.toLocaleString('es-CL')}</li>`;
+        total += item.precio;
+    });
+    htmlResumen += `</ul><hr><strong>Total Pagado: $${total.toLocaleString('es-CL')}</strong>`;
+    resumenDiv.innerHTML = htmlResumen;
+
+    document.getElementById("mensaje-exito").style.display = "block";
+
+    // SEGURIDAD: Limpiar datos
+    sessionStorage.removeItem("orden_productos");
+    ordenproductos = [];
+}

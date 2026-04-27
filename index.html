@@ -2,52 +2,80 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tienda Virtual</title>
+    <title>Tienda de Deportes</title>
     <link rel="stylesheet" href="style.css">
 
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
 </head>
 <body>
     <header>
-    <h1>Mi Tienda Virtual SportyStyle</h1>
-    <nav>
+    <h1 class="logo">Tienda de Deportes SportyStyle</h1>
         <div id="auth-ui">
-        <button id="btn-login">Iniciar Sesión</button>
+            <button id="btn-login">Iniciar Sesión</button>
             <button id="btn-logout" style="display: none;">Cerrar Sesión</button>
             <span id="mensaje-bienvenida"></span>
-        <button id="cart-btn">🛒 Carrito (<span id="cart-count">0</span>)</button>
         </div>
-    </nav>
     </header>
-
     <main>
-    <section id="products">
-        <h2>Productos</h2>
-        <div class="product" data-id="1" data-name="Camiseta" data-price="15000">
-        <h3>Camiseta</h3>
-        <p>$15.000</p>
-        <button class="add-to-cart">Agregar al carrito</button>
-        </div>
-        <div class="product" data-id="2" data-name="Zapatos" data-price="35000">
-        <h3>Zapatos</h3>
-        <p>$35.000</p>
-        <button class="add-to-cart">Agregar al carrito</button>
-        </div>
-        <div class="product" data-id="3" data-name="Gorra" data-price="8000">
-        <h3>Gorra</h3>
-        <p>$8.000</p>
-        <button class="add-to-cart">Agregar al carrito</button>
-        </div>
-    </section>
-
-    <section id="cart" style="display:none;">
-        <h2>Carrito</h2>
-        <ul id="cart-items"></ul>
-        <p>Total: $<span id="cart-total">0</span></p>
-    </section>
+    <img src="Img/deportes.JPG" alt="Imagen de deportes" class="main-image"> <!-- Aquí podrías agregar más contenido en el futuro -->
     </main>
 
+        <main id="app-content" style="display: none;">
+        
+        <div id="encabezado-catalogo">
+            <h2>Agregar productos</h2>
+            <p>Seleccione los articulos que necesita:</p>
+        </div>
+
+        <section id="lista-productos" class="grid-container">
+            </section>
+
+        <aside id="orden-productos">
+            <h3>Articulos</h3>
+            <ul id="lista-productos">
+                </ul>
+            <p><strong>Total Copago: $<span id="total-copago">0</span></strong></p>
+            <button id="btn-despacho" disabled>Confirmar Despacho</button>
+        </aside>
+
+        <section id="checkout-section" style="display: none; width: 100%; margin-top: 20px;">
+            <div class="checkout-card">
+                <h3>Datos cliente para Confirmación</h3>
+                <form id="form-checkout">
+                    <div class="form-group">
+                        <label>Nombre Completo:</label>
+                        <input type="text" id="input-nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección (Sucursal o Domicilio):</label>
+                        <input type="text" id="input-direccion" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Correo Electrónico:</label>
+                        <input type="text" id="input-correo" placeholder="ejemplo@correo.com" required>
+                        <span id="error-correo" style="color: red; font-size: 0.8rem; display: none;">Debe contener '@' y un dominio válido.</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono de Contacto:</label>
+                        <input type="text" id="input-telefono" placeholder="Ej: 987654321" required>
+                        <span id="error-telefono" style="color: red; font-size: 0.8rem; display: none;">Solo se permiten números (mínimo 8 dígitos).</span>
+                    </div>
+                    
+                    <button type="submit" id="btn-finalizar">Finalizar Compra</button>
+                    <button type="button" id="btn-cancelar" style="background: #6c757d;">Cancelar</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="mensaje-exito" style="display: none; width: 100%; text-align: center; margin-top: 40px;">
+            <h2 style="color: #28a745;">✅ ¡Productos Agendados con Éxito!</h2>
+            <p>Gracias por comprar en SportyStyle.</p>
+            <div id="resumen-final" style="background: white; padding: 20px; border-radius: 8px; display: inline-block; text-align: left;"></div>
+            <br><br>
+            <button onclick="location.reload()">Volver al Inicio</button>
+        </section>
+
+    </main>
     <script src="app.js"></script>
 </body>
 </html>
