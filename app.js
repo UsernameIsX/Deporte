@@ -125,31 +125,30 @@ function renderizarCatalogo() {
 }
 
 function renderizarOrden() {
-    const listaOrden = document.getElementById("items-carrito"); // ID único para el carrito
+    // Buscamos el nuevo ID 'items-carrito'
+    const listaOrden = document.getElementById("items-carrito"); 
     const spanTotal = document.getElementById("total-copago");
-    const btnAgendar = document.getElementById("btn-agendar");
+    const btnAgendar = document.getElementById("btn-agendar"); // Coincide con el HTML
     
-    if (!listaOrden) return;
     listaOrden.innerHTML = "";
     let total = 0;
 
     if (ordenproductos.length === 0) {
         listaOrden.innerHTML = "<li>No hay productos seleccionados.</li>";
-        if (btnAgendar) btnAgendar.disabled = true;
+        btnAgendar.disabled = true;
     } else {
         ordenproductos.forEach((item, index) => {
             total += item.precio;
             const li = document.createElement("li");
             li.innerHTML = `
                 ${item.nombre} - $${item.precio.toLocaleString('es-CL')}
-                <button onclick="eliminarDeOrden(${index})" style="background: red; color: white; border: none; cursor: pointer; margin-left: 10px;">X</button>
+                <button onclick="eliminarDeOrden(${index})" style="background: red; color: white; border: none; padding: 2px 5px; margin-left: 10px; cursor: pointer;">X</button>
             `;
             listaOrden.appendChild(li);
         });
-        if (btnAgendar) btnAgendar.disabled = false;
+        btnAgendar.disabled = false;
     }
-
-    if (spanTotal) spanTotal.innerText = total.toLocaleString('es-CL');
+    spanTotal.innerText = total.toLocaleString('es-CL');
 }
 
 // ==========================================
