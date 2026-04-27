@@ -96,9 +96,7 @@ const productos = [ // Cambiado a plural para evitar errores
     { id: 3, categoria: "Gorros", nombre: "Jockey", descripcion: "Marca Stone", precio: 9000, icono: "🧢" },
 ];
 
-// ==========================================
-// 6. ESTADO DE LA ORDEN
-// ==========================================
+
 let ordenproductos = JSON.parse(sessionStorage.getItem("orden_productos")) || [];
 
 // ==========================================
@@ -109,33 +107,33 @@ function renderizarCatalogo() {
     if (!contenedor) return;
     contenedor.innerHTML = ""; 
 
-    productos.forEach(prod => {
+    productos.forEach(p => {
         const tarjeta = document.createElement("div");
         tarjeta.className = "productos-card";
         tarjeta.innerHTML = `
-            <div style="font-size: 3rem;">${prod.icono}</div>
-            <h3>${prod.nombre}</h3>
-            <span class="categoria">${prod.categoria}</span>
-            <p>${prod.descripcion}</p>
-            <p class="precio">Copago: $${prod.precio.toLocaleString('es-CL')}</p>
-            <button onclick="agregarAOrden(${prod.id})">Agregar a la lista</button>
+            <div style="font-size: 3rem;">${p.icono}</div>
+            <h3>${p.nombre}</h3>
+            <span class="categoria">${p.categoria}</span>
+            <p>${p.descripcion}</p>
+            <p class="precio">Copago: $${p.precio.toLocaleString('es-CL')}</p>
+            <button onclick="agregarAOrden(${p.id})">Agregar a la lista</button>
         `;
         contenedor.appendChild(tarjeta);
     });
 }
 
 function renderizarOrden() {
-    // Buscamos el nuevo ID 'items-carrito'
     const listaOrden = document.getElementById("items-carrito"); 
     const spanTotal = document.getElementById("total-copago");
-    const btnAgendar = document.getElementById("btn-agendar"); // Coincide con el HTML
+    const btnAgendar = document.getElementById("btn-despacho"); // Coincide con el HTML
     
+    if (!listaOrden) return;
     listaOrden.innerHTML = "";
     let total = 0;
 
     if (ordenproductos.length === 0) {
         listaOrden.innerHTML = "<li>No hay productos seleccionados.</li>";
-        btnAgendar.disabled = true;
+        if (btnAgendar) btnAgendar.disabled = true;
     } else {
         ordenproductos.forEach((item, index) => {
             total += item.precio;
@@ -146,9 +144,9 @@ function renderizarOrden() {
             `;
             listaOrden.appendChild(li);
         });
-        btnAgendar.disabled = false;
+        if (btnAgendar) btnAgendar.disabled = false;
     }
-    spanTotal.innerText = total.toLocaleString('es-CL');
+    if (spanTotal) spanTotal.innerText = total.toLocaleString('es-CL');
 }
 
 // ==========================================
@@ -178,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderizarCatalogo();
     renderizarOrden();
 
-    const btnAgendar = document.getElementById("btn-agendar");
+    const btnAgendar = document.getElementById("btn-despacho");
     const checkoutSection = document.getElementById("checkout-section");
     const formCheckout = document.getElementById("form-checkout");
 
