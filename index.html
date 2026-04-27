@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Virtual</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+</head>
+<body>
+    <header>
+    <h1>Mi Tienda Virtual SportyStyle</h1>
+    <nav>
+        <div id="auth-ui">
+        <button id="btn-login">Iniciar Sesión</button>
+            <button id="btn-logout" style="display: none;">Cerrar Sesión</button>
+            <span id="mensaje-bienvenida"></span>
+        <button id="cart-btn">🛒 Carrito (<span id="cart-count">0</span>)</button>
+        </div>
+    </nav>
+    </header>
+
+    <main>
+    <section id="products">
+        <h2>Productos</h2>
+        <div class="product" data-id="1" data-name="Camiseta" data-price="15000">
+        <h3>Camiseta</h3>
+        <p>$15.000</p>
+        <button class="add-to-cart">Agregar al carrito</button>
+        </div>
+        <div class="product" data-id="2" data-name="Zapatos" data-price="35000">
+        <h3>Zapatos</h3>
+        <p>$35.000</p>
+        <button class="add-to-cart">Agregar al carrito</button>
+        </div>
+        <div class="product" data-id="3" data-name="Gorra" data-price="8000">
+        <h3>Gorra</h3>
+        <p>$8.000</p>
+        <button class="add-to-cart">Agregar al carrito</button>
+        </div>
+    </section>
+
+    <section id="cart" style="display:none;">
+        <h2>Carrito</h2>
+        <ul id="cart-items"></ul>
+        <p>Total: $<span id="cart-total">0</span></p>
+    </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
