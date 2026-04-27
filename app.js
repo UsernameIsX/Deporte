@@ -93,7 +93,7 @@ document.getElementById("btn-logout").addEventListener("click", () => {
 const productos = [ // Cambiado a plural para evitar errores
     { id: 1, categoria: "Ropa", nombre: "polera", descripcion: "Equipo Ulpo", precio: 18000, icono: "👕" },
     { id: 2, categoria: "Calzado", nombre: "Zapatillas", descripcion: "Marca AIDO", precio: 35000, icono: "👟" },
-    { id: 3, categoria: "Gorroggg", nombre: "Jockeyggg", descripcion: "Marca Stonejjj", precio: 9000, icono: "🧢" },
+    { id: 3, categoria: "Gorros", nombre: "Jockey", descripcion: "Marca Stone", precio: 9000, icono: "🧢" },
 ];
 
 // ==========================================
